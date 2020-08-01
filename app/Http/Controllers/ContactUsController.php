@@ -17,6 +17,8 @@ class ContactUsController extends Controller
      */
     public function index()
     {
+        $response = array();
+
         $response['title'] =  'Software Development Company - Contact Us | CodeRiders';
         $response['description'] =  'Let\'s talk about your business needs on custom software development, web development and design, software outsourcing, IT consulting, BI solution, CRM, etc.';
         $response['target_blog']['image']['full_url'] = asset('/storage/images/fbshare/contactus.jpg');
@@ -32,7 +34,7 @@ class ContactUsController extends Controller
      */
     public function store(Request $request) {
 
-        $validatedData = $request->validateWithBag('post', [
+        $request->validateWithBag('post', [
             'name' => ['required', 'max:255'],
             'email' => ['required', 'email', 'unique'],
             'company' => ['required', 'max:255'],
@@ -40,7 +42,7 @@ class ContactUsController extends Controller
             'phone' => ['regex:/[0-9+\-()]{8,}/'],
             'g-recaptcha-response' => 'required|captcha',
             'jobTitle' => ['max:255'],
-            'attachment' => ['required', 'file', 'max:10240', 'mimes:jpeg,jpg,png,gif,pdf,doc,docx,ppt,pptx,txt,xls,xlsx,xlxs']
+            'attachment' => ['required', 'file', 'max:2000000', 'mimes:jpeg,jpg,png,gif,pdf,doc,docx,ppt,pptx,txt,xls,xlsx,xlxs']
         ]);
 
         $path = $request->client_image->store('uploads');
@@ -55,8 +57,12 @@ class ContactUsController extends Controller
             'file' => $path,
         ] ) ;
         $support->save();
+
         $data = ['message' => 'This is a test!'];
         Mail::to($request->input('email'))->send(new TestEmail($data));
+        /* Mail::to('arengr.1990@gmail.com')->send(new TestEmail($data)); */ //Es toxov a ashxatum, qani vor inputner chunneq
+
+        return back();
     }
 
 
@@ -68,15 +74,18 @@ class ContactUsController extends Controller
     public function subscriber(Request $request)
     {
         $request->validate([
-            'email' => ['required', 'email'],
-            'token' => ['required']
+            'email' => ['required', 'email', 'unique:subscribers'],
+            /* 'token' => ['required'] */
         ]);
 
-        Subscriber::make([
+        $subscriber = Subscriber::make([
             'email'=>$request->input('email'),
-            'recipient_id'=>$request->input('recipient_id');
-
+            'recipient_id'=>$request->input('recipient_id') // ????
         ]);
+
+        $subscriber->save();
+        
+        return back();
     }
     
 }

@@ -114,7 +114,8 @@ Route::prefix('/blog')->group(function () {
 });
 
 //contactUs
-Route::prefix('/contact-us')->group(function () {
-    Route::get('/', 'ContactUsController@index')->name('contactus.index');
-    Route::post('/store', 'ContactUsController@store')->name('contactus.store');
+Route::prefix('/contuctus')->group(function () {
+    Route::get('', 'ContactUsController@index')->name('contactus.index');
+    Route::any('/send', 'ContactUsController@store')->name('contactus.store');
+    Route::any('/subscriber', 'ContactUsController@subscriber')->name('contactus.sunscriber');
 });
