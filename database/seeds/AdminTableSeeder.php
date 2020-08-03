@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AdminTableSeeder extends Seeder
 {
@@ -15,7 +16,7 @@ class AdminTableSeeder extends Seeder
         DB::table('admins')->insert([
             'name'=>'admin',
             'email'=>'info@coderiders.am',
-            'password'=>'Riders13!'
+            'password'=>Hash::make('Riders13!')
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Blog;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class BlogController extends Controller
@@ -21,7 +22,7 @@ class BlogController extends Controller
                 [ 'id', 'title', 'slug', 'image', 'image_title', 'image_alt', 'content', 'page_title','page_description', 'publish_status', 'trending_status', 'main_status', 'created_at' ]
             );
 
-        $main_blog_id = $main_blog[0]->id ?? false;
+        $main_blog_id = $main_blog->first()->id ?? false;
 
         $recent_blogs   = Blog::getRecentBlogs(false, 6, 0);
         $trending_blogs = Blog::getTrendingBlogs(true, $main_blog_id);
@@ -71,13 +72,13 @@ class BlogController extends Controller
             return abort(404);
         }
 
-        $target_blog_id = $target_blog[0]->id ?? false;
+        $target_blog_id = $target_blog->first()->id ?? false;
 
         $trending_blogs = Blog::getTrendingBlogs(true, $target_blog_id);
         $related_blogs  = Blog::findRelatedBlogs($target_blog_id);
 
-        $response['title']          = $target_blog[0]->title;
-        $response['description']    = $target_blog[0]->page_description;
+        $response['title']          = $target_blog->first()->title;
+        $response['description']    = $target_blog->first()->page_description;
         $response['target_blog']    = $target_blog;
         $response['trending_blogs'] = $trending_blogs;
         $response['related_blogs']  = $related_blogs;
@@ -112,6 +113,9 @@ class BlogController extends Controller
                 $date = date_create($value['created_at']);
                 $date = date_format($date,"d.m.Y");
 
+                /* $dateObject = Carbon::createFromFormat('d/m/Y', $date)->toDateString(); */
+                /* $date = Carbon::createFromFormat('d-m-Y', '12-11-2020'); */
+
                 $content = strip_tags($value['content']);
                 $content_length = mb_strlen($content);
                 $need_to_split = 200;
@@ -140,23 +144,25 @@ class BlogController extends Controller
     //Helper Functions
 
     private function generateTwitterLink($slug) {
-        $basePath = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s" : "") . "://" . $_SERVER['HTTP_HOST'];
+
+        $basePath = "http" . ((request()->server('SERVER_PORT') == 443) ? "s" : "") . "://" . request()->server('HTTP_HOST');
+        /* $basePath = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s" : "") . "://" . $_SERVER['HTTP_HOST']; */
         return 'https://twitter.com/intent/tweet?url=' . $basePath . '/blog/' . $slug;
     }
 
     private function generateFacebookLink($slug) {
-        $basePath = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s" : "") . "://" . $_SERVER['HTTP_HOST'];
+        $basePath = "http" . ((request()->server('SERVER_PORT') == 443) ? "s" : "") . "://" . request()->server('HTTP_HOST');
         return $basePath . '/blog/' . $slug;
     }
 
     private function generateLinkedInLink($slug, $title, $description) {
-        $basePath = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s" : "") . "://" . $_SERVER['HTTP_HOST'];
+        $basePath = "http" . ((request()->server('SERVER_PORT') == 443) ? "s" : "") . "://" . request()->server('HTTP_HOST');
         return
             'https://www.linkedin.com/shareArticlemini=true&url=' . $basePath . '/blog/' . $slug . '&title=' . urlencode($title) . '&summary=' . urlencode($description) . '&source=' . $basePath . '/blog/' . $slug;
     }
 
     private function generateGooglePlusLink($slug) {
-        $basePath = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s" : "") . "://" . $_SERVER['HTTP_HOST'];
+        $basePath = "http" . ((request()->server('SERVER_PORT') == 443) ? "s" : "") . "://" . request()->server('HTTP_HOST');
         return 'https://plus.google.com/share?url=' . $basePath . '/blog/' . $slug;
     }
 
