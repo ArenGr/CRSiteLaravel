@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Blog;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
@@ -110,14 +111,9 @@ class BlogController extends Controller
 
         if(!$recent_blogs->isEmpty()) {
             foreach ($recent_blogs as $key => $value) {
-                $date = date_create($value['created_at']);
-                $date = date_format($date,"d.m.Y");
-
-                /* $dateObject = Carbon::createFromFormat('d/m/Y', $date)->toDateString(); */
-                /* $date = Carbon::createFromFormat('d-m-Y', '12-11-2020'); */
-
+                $date = Carbon::parse($value['created_at'])->format("d.m.Y");
                 $content = strip_tags($value['content']);
-                $content_length = mb_strlen($content);
+                $content_length = Str::length($value['content']);
                 $need_to_split = 200;
                 $content = substr($content, 0, $need_to_split)."...";
 
@@ -146,7 +142,6 @@ class BlogController extends Controller
     private function generateTwitterLink($slug) {
 
         $basePath = "http" . ((request()->server('SERVER_PORT') == 443) ? "s" : "") . "://" . request()->server('HTTP_HOST');
-        /* $basePath = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s" : "") . "://" . $_SERVER['HTTP_HOST']; */
         return 'https://twitter.com/intent/tweet?url=' . $basePath . '/blog/' . $slug;
     }
 
